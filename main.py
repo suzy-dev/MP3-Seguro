@@ -1,9 +1,22 @@
 import customtkinter as ctk
 import subprocess
 import threading
+import os
+import sys
 from tkinter import filedialog
 
 caminho_destino = ""
+
+def obter_caminho_motor():
+    """ Encontra o yt-dlp.exe na mesma pasta onde o script ou .exe está rodando """
+    if getattr(sys, 'frozen', False):
+        # Se estiver rodando como .exe (PyInstaller)
+        diretorio_atual = os.path.dirname(sys.executable)
+    else:
+        # Se estiver rodando como script .py
+        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
+    
+    return os.path.join(diretorio_atual, "yt-dlp.exe")
 
 def limpar_url(url):
     if "&" in url:
@@ -19,22 +32,19 @@ def selecionar_pasta():
 
 def acao_baixar():
     url_bruta = entry_url.get().strip()
-    
     if not url_bruta:
         label_status.configure(text="Por favor, cole um link!", text_color="orange")
         return
 
     url_limpa = limpar_url(url_bruta)
-    
     progress_bar.pack(pady=20, after=label_pasta) 
     progress_bar.set(0)
     progress_bar.start()
-    
     threading.Thread(target=executar_download, args=(url_limpa,), daemon=True).start()
 
 def executar_download(url):
-    pasta_final = caminho_destino if caminho_destino else r"C:\Users\suzana.araujo\Downloads"
-    caminho_executavel = r"C:\Users\suzana.araujo\Downloads\yt-dlp.exe"
+    pasta_final = caminho_destino if caminho_destino else os.path.join(os.path.expanduser("~"), "Downloads")
+    caminho_executavel = obter_caminho_motor()
     
     label_status.configure(text="⏳ Baixando... aguarde.", text_color="yellow")
 
@@ -43,19 +53,22 @@ def executar_download(url):
         "--audio-quality", "0", "-o", f"{pasta_final}/%(title)s.%(ext)s", url
     ]
     
-    resultado = subprocess.run(comando, capture_output=True, text=True)
-    
-    progress_bar.stop()
-    
-    if resultado.returncode == 0:
-        progress_bar.set(1)
-        label_status.configure(text="Sucesso! Música no pendrive.", text_color="green")
-    else:
-        progress_bar.pack_forget() # Esconde se der erro para não confundir
-        label_status.configure(text="Erro no download. Verifique o link.", text_color="red")
+    try:
+        resultado = subprocess.run(comando, capture_output=True, text=True)
+        progress_bar.stop()
+        
+        if resultado.returncode == 0:
+            progress_bar.set(1)
+            label_status.configure(text="Sucesso! Música no pendrive.", text_color="green")
+        else:
+            progress_bar.pack_forget()
+            label_status.configure(text="Erro no download. Motor não encontrado?", text_color="red")
+    except Exception as e:
+        progress_bar.pack_forget()
+        label_status.configure(text=f"Erro crítico: {str(e)}", text_color="red")
 
 app = ctk.CTk()
-app.title("Suzana's Music Downloader")
+app.title("MP3 Seguro")
 app.geometry("550x500")
 
 ctk.CTkLabel(app, text="Link do YouTube", font=("Arial", 22, "bold")).pack(pady=20)
