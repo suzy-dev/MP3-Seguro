@@ -58,6 +58,22 @@ Ao baixar a versão pronta, você encontrará:
 - `ffmpeg.exe` — Conversão de vídeo para áudio MP3  
 ---
 
+## 🔐 Segurança e Integridade
+
+Para garantir a transparência e a segurança dos usuários, este projeto adota práticas recomendadas de distribuição de software:
+
+### 1. Verificação de Integridade (Checksum)
+Você pode confirmar que o arquivo baixado é exatamente o original gerado pela desenvolvedora e que não foi corrompido ou alterado por terceiros conferindo sua "impressão digital" (Hash SHA-256).
+
+**Hash SHA-256 Oficial:**
+`B27E0893AC69A260A64B5E13D1831B5EEA85500AD23977FDC4A46F4601081BB1`
+
+**Como verificar no Windows (PowerShell):**
+```powershell
+Get-FileHash .\MP3_Seguro_v1.0.zip
+
+---
+
 ## 📌 Observações
 
 - Projeto desenvolvido com fins **educacionais e de aprendizado técnico**.
